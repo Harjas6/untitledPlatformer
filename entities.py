@@ -1,6 +1,8 @@
 import time
 
 import pygame
+
+import debugger
 from settings import *
 
 
@@ -13,8 +15,9 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image,(64,64))
         self.rect = self.image.get_rect(topleft=pos)
         self.direction = pygame.math.Vector2(0,0)
-        self.speed = 8
+        self.speed = SPEED
         self.jump_speed = -16
+        self.has_jumped = True
         self.gravity = 0.8
 
     # Updates player
@@ -25,7 +28,7 @@ class Player(pygame.sprite.Sprite):
     # Moves player
     def move(self):
         self.rect.x += self.direction.x * self.speed
-
+        debugger.debug(self.direction * self.speed)
 
     def apply_grav(self):
         self.direction.y += self.gravity
@@ -42,21 +45,10 @@ class Player(pygame.sprite.Sprite):
             self.direction.x = 0
 
         if keys[pygame.K_SPACE]:
-            self.jump()
+            if not self.has_jumped:
+                self.jump()
+                self.has_jumped = True
 
     def jump(self):
         self.direction.y = self.jump_speed
 
-    # if object collide with player puts player on correct side of object
-    def place_player(self,direc, tile):
-        if tile.rect.colliderect(self.rect):
-            match direc:
-                case 'on top':
-                    self.rect.bottom = tile.rect.top
-                case 'below':
-                    self.rect.top = tile.rect.bottom
-                    self.direction.y = 1
-                case 'on the right':
-                    self.rect.left = tile.rect.right
-                case 'on the left':
-                    self.rect.right = tile.rect.left

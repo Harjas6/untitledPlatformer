@@ -12,6 +12,7 @@ class Level():
         self.player = pygame.sprite.GroupSingle()
         self.create_level()
         self.world_shift = pygame.math.Vector2()
+        self.shift_amount = 8
 
 
     def create_level(self):
@@ -19,23 +20,18 @@ class Level():
         for layer in layers:
             if hasattr(layer, 'data'):
                 for x, y, surf in layer.tiles():
-                    pos = (x * 32, y * 32 )
+                    pos = (x * 32, y * 32)
                     self.tiles.add(Tile(pos=pos, surf=surf))
                     self.player.add(Player((300,650)))
         self.tiles.draw(self.display)
 
     def run(self):
-        #tiles
-
+        self.scroll()
         self.tiles.update(self.world_shift)
         self.tiles.draw(self.display)
-
-
-        #player
         self.player.update()
         self.horiz_collisons()
         self.vert_collisons()
-        self.scroll()
         self.player.draw(self.display)
 
 
@@ -48,11 +44,14 @@ class Level():
         player_x = player.rect.centerx
         direct_x = player.direction.x
         if player_x < WIDTH/3 and direct_x < 0:
-            self.world_shift.x = 8
+            self.world_shift.x = self.shift_amount
+            player.rect.x += self.shift_amount
             player.speed = 0
         elif player_x > WIDTH*2/3 and direct_x > 0:
-            self.world_shift.x = -8
+            self.world_shift.x = -self.shift_amount
+            player.rect.x += -self.shift_amount
             player.speed = 0
+
         else:
             self.world_shift.x = 0
             player.speed = 8
@@ -62,10 +61,12 @@ class Level():
         player_y = player.rect.centery
         direct_y = player.direction.y
         if player_y < HEIGHT*1/5 and direct_y < 0:
-            self.world_shift.y = 16
+            self.world_shift.y = self.shift_amount
+            player.rect.y += self.shift_amount
             player.speed = 0
-        elif player_y > HEIGHT*4/5:
-            self.world_shift.y = -16
+        elif player_y > HEIGHT*5/6:
+            self.world_shift.y = -self.shift_amount
+            player.rect.y += -self.shift_amount
             player.speed = 0
         else:
             self.world_shift.y = 0
@@ -93,6 +94,7 @@ class Level():
                 if player.direction.y > 0:
                     player.rect.bottom = tile.rect.top
                     player.direction.y = 0
+                    player.has_jumped = False
                 elif player.direction.y < 0:
                     player.rect.top = tile.rect.bottom
                     player.direction.y = 0
