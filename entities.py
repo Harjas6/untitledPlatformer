@@ -14,19 +14,18 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
         self.direction = pygame.math.Vector2(0,0)
         self.speed = 8
-        self.jump_speed = -10
+        self.jump_speed = -16
         self.gravity = 0.8
 
     # Updates player
     def update(self):
         self.input()
-        self.move()
+
 
     # Moves player
     def move(self):
-        # Changes player position
         self.rect.x += self.direction.x * self.speed
-        self.apply_grav()
+
 
     def apply_grav(self):
         self.direction.y += self.gravity
@@ -43,6 +42,21 @@ class Player(pygame.sprite.Sprite):
             self.direction.x = 0
 
         if keys[pygame.K_SPACE]:
-            self.direction.y = self.jump_speed
+            self.jump()
 
+    def jump(self):
+        self.direction.y = self.jump_speed
 
+    # if object collide with player puts player on correct side of object
+    def place_player(self,direc, tile):
+        if tile.rect.colliderect(self.rect):
+            match direc:
+                case 'on top':
+                    self.rect.bottom = tile.rect.top
+                case 'below':
+                    self.rect.top = tile.rect.bottom
+                    self.direction.y = 1
+                case 'on the right':
+                    self.rect.left = tile.rect.right
+                case 'on the left':
+                    self.rect.right = tile.rect.left

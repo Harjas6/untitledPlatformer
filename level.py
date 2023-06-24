@@ -19,10 +19,25 @@ class Level():
         for layer in layers:
             if hasattr(layer, 'data'):
                 for x, y, surf in layer.tiles():
-                    pos = (x * 32, y * 32 - 1300)
+                    pos = (x * 32, y * 32 )
                     self.tiles.add(Tile(pos=pos, surf=surf))
                     self.player.add(Player((300,650)))
         self.tiles.draw(self.display)
+
+    def run(self):
+        #tiles
+
+        self.tiles.update(self.world_shift)
+        self.tiles.draw(self.display)
+
+
+        #player
+        self.player.update()
+        self.horiz_collisons()
+        self.vert_collisons()
+        self.scroll()
+        self.player.draw(self.display)
+
 
     def scroll(self):
         self.scroll_x()
@@ -32,10 +47,10 @@ class Level():
         player = self.player.sprite
         player_x = player.rect.centerx
         direct_x = player.direction.x
-        if player_x < WIDTH/4 and direct_x < 0:
+        if player_x < WIDTH/3 and direct_x < 0:
             self.world_shift.x = 8
             player.speed = 0
-        elif player_x > WIDTH*3/4 and direct_x > 0:
+        elif player_x > WIDTH*2/3 and direct_x > 0:
             self.world_shift.x = -8
             player.speed = 0
         else:
@@ -46,24 +61,41 @@ class Level():
         player = self.player.sprite
         player_y = player.rect.centery
         direct_y = player.direction.y
-        if player_y < HEIGHT/5 and direct_y < 0:
-            self.world_shift.y = 8
+        if player_y < HEIGHT*1/5 and direct_y < 0:
+            self.world_shift.y = 16
             player.speed = 0
-        elif player_y > HEIGHT*4/5 and direct_y > 0:
-            self.world_shift.y = -8
+        elif player_y > HEIGHT*4/5:
+            self.world_shift.y = -16
             player.speed = 0
         else:
             self.world_shift.y = 0
             player.speed = 8
 
-    def run(self):
-        self.tiles.update(self.world_shift)
-        self.tiles.draw(self.display)
-        self.player.update()
-        self.player.draw(self.display)
-        self.scroll()
+
+    def horiz_collisons(self):
+        player = self.player.sprite
+        player.move()
+
+        for tile in self.tiles.sprites():
+            if tile.rect.colliderect(player.rect):
+                if player.direction.x > 0:
+                    player.rect.right = tile.rect.left
+                elif player.direction.x < 0:
+                    player.rect.left = tile.rect.right
 
 
+    def vert_collisons(self):
+        player = self.player.sprite
+        player.apply_grav()
+
+        for tile in self.tiles.sprites():
+            if tile.rect.colliderect(player.rect):
+                if player.direction.y > 0:
+                    player.rect.bottom = tile.rect.top
+                    player.direction.y = 0
+                elif player.direction.y < 0:
+                    player.rect.top = tile.rect.bottom
+                    player.direction.y = 0
 
 
 class Tile(pygame.sprite.Sprite):
