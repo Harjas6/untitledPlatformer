@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.math.Vector2(0,0)
         self.speed = SPEED
         self.jump_speed = -16
-        self.has_jumped = True
+        self.in_air = True
         self.gravity = 0.8
 
     # Updates player
@@ -47,9 +47,9 @@ class Player(pygame.sprite.Sprite):
 
         # Jumps unless player is already in air
         if keys[pygame.K_SPACE]:
-            if not self.has_jumped:
+            if not self.in_air:
                 self.jump()
-                self.has_jumped = True
+                self.in_air = True
 
     # Adds jump speed to player direction to simulate jump
     def jump(self):

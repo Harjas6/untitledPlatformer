@@ -73,7 +73,7 @@ class Level():
         else:
             self.world_shift.y = 0
 
-    # Checks if players x position collides with any tiles
+    # Checks if players x position collides with any tiles and if not touching any tiles sets player in_air True
     def horiz_collisons(self):
         player = self.player.sprite
         player.move()
@@ -82,11 +82,13 @@ class Level():
             if tile.rect.colliderect(player.rect):
                 if player.direction.x > 0:
                     player.rect.right = tile.rect.left
+                    return None
                 elif player.direction.x < 0:
                     player.rect.left = tile.rect.right
+                    return None
+        player.in_air = True
 
-
-    # Checks if players y position collides with any tiles
+    # Checks if players y position collides with any tiles and if not touching any tiles sets player in_air True
     def vert_collisons(self):
         player = self.player.sprite
         player.apply_grav()
@@ -96,12 +98,14 @@ class Level():
                 if player.direction.y > 0:
                     player.rect.bottom = tile.rect.top
                     player.direction.y = 0
-                    player.has_jumped = False
+                    player.in_air = False
+                    return None
                 elif player.direction.y < 0:
                     player.rect.top = tile.rect.bottom
                     player.direction.y = 0
+                    return None
 
-
+        player.in_air = True
 
 class Tile(pygame.sprite.Sprite):
     # Creates a block with an image specified by name and places it in a group(s)
