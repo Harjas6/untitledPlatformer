@@ -30,11 +30,12 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += self.direction.x * self.speed
         debugger.debug(self.direction * self.speed)
 
+    # Applies gravity to player
     def apply_grav(self):
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
 
-    # Sets x direction according to input
+    # Sets direction according to input and jump
     def input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -44,11 +45,13 @@ class Player(pygame.sprite.Sprite):
         else:
             self.direction.x = 0
 
+        # Jumps unless player is already in air
         if keys[pygame.K_SPACE]:
             if not self.has_jumped:
                 self.jump()
                 self.has_jumped = True
 
+    # Adds jump speed to player direction to simulate jump
     def jump(self):
         self.direction.y = self.jump_speed
 
