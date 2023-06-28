@@ -1,5 +1,7 @@
 import math
 import pygame
+
+import debugger
 from settings import *
 
 
@@ -18,35 +20,17 @@ class Player(pygame.sprite.Sprite):
         self.in_air = True
         self.gravity = 0.8
 
-
     # Loads all converted png and places in dictionary
     def load_pngs(self):
-        idle = self.load_idle()
-        left = self.load_left()
-        right = self.load_right()
-        jump = self.load_jump()
+        idle = ['idle', 'idle2']
+        idle = self.png_loader(idle)
+        left = ['left', 'left2', 'left3']
+        left = self.png_loader(left)
+        right = ['right', 'right2', 'right3']
+        right = self.png_loader(right)
+        jump = ['jump', 'jump2']
+        jump = self.png_loader(jump)
         return {'idle': [idle], 'left': [left], 'right': [right], 'jump': [jump]}
-
-
-    # Loads idle pngs
-    def load_idle(self):
-        names = ['idle', 'idle2']
-        return self.png_loader(names)
-
-    # Loads leftward pngs
-    def load_left(self):
-        names = ['left', 'left2', 'left3']
-        return self.png_loader(names)
-
-    # Loads rightward pngs
-    def load_right(self):
-        names = ['right', 'right2', 'right3']
-        return self.png_loader(names)
-
-    # Loads jumping pngs
-    def load_jump(self):
-        names = ['jump', 'jump2']
-        return self.png_loader(names)
 
     # Loads pngs according to names given
     def png_loader(self, names):
@@ -61,6 +45,7 @@ class Player(pygame.sprite.Sprite):
     # Grabs user input
     def update(self):
         self.input()
+
 
     # Moves player
     def move(self):
@@ -109,11 +94,35 @@ class Player(pygame.sprite.Sprite):
             self.anim_index += anim_speed
             if self.anim_index > len(animation):
                 self.anim_index = 0
-            self.image = animation[math.floor(math.floor(self.anim_index))]
+            self.image = animation[math.floor(self.anim_index)]
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, patrol_time):
         super().__init__()
-        self.image = pygame.image.load('images/blob.png').convert_alpha()
+        self.image = pygame.image.load('images/groundL_enemy.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (64, 64))
         self.rect = self.image.get_rect(topleft=pos)
+        self.patrol_time = patrol_time
+        self.time_passed = pygame.time.get_ticks()
+        self.direction = 1
+        self.speed = 3
+        self.patrol_end = False
+
+
+    def update(self,shift):
+        self.patrol(shift)
+
+    def patrol(self,shift):
+        if pygame.time.get_ticks() - self.time_passed > self.patrol_time:
+            self.time_passed = pygame.time.get_ticks()
+            self.patrol_end = True
+        self.move(shift)
+
+    def move(self, shift):
+        if self.patrol_end:
+            self.direction *= -1
+            self.patrol_end = False
+        self.rect.x += self.direction * self.speed
+        self.rect.x += shift.x
+        self.rect.y += shift.y

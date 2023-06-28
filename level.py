@@ -1,6 +1,8 @@
 import pygame
 from pytmx import load_pygame
-from entities import Player
+
+import debugger
+from entities import Player, Enemy
 from settings import *
 
 
@@ -10,6 +12,7 @@ class Level():
         self.tmx_data = load_pygame('level/tmx/untitledPlatformerTile1.tmx')
         self.tiles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
+        self.enemies = pygame.sprite.Group()
         self.create_level()
         self.world_shift = pygame.math.Vector2()
         self.shift_amount = 8
@@ -22,7 +25,8 @@ class Level():
                 for x, y, surf in layer.tiles():
                     pos = (x * 32, y * 32)
                     self.tiles.add(Tile(pos=pos, surf=surf))
-                    self.player.add(Player((300,650)))
+        self.player.add(Player((300,650)))
+        self.enemies.add(Enemy((300,650),1000))
         self.tiles.draw(self.display)
 
     # Runs the level
@@ -32,6 +36,9 @@ class Level():
         # updates tiles
         self.tiles.update(self.world_shift)
         self.tiles.draw(self.display)
+
+        self.enemies.update(self.world_shift)
+        self.enemies.draw(self.display)
 
         # Updates player position and collisons
         self.player.update()
@@ -73,11 +80,18 @@ class Level():
         else:
             self.world_shift.y = 0
 
-    # Checks if players x position collides with any tiles and if not touching any tiles sets player in_air True
+    # All horizontal collsions
     def horiz_collisons(self):
+        self.horiz_tiles_collide()
+
+    # All vertical collsions
+    def vert_collisons(self):
+        self.vert_tiles_collide()
+
+    # Checks if players x position collides with any tiles and if not touching any tiles sets player in_air True
+    def horiz_tiles_collide(self):
         player = self.player.sprite
         player.move()
-
         for tile in self.tiles.sprites():
             if tile.rect.colliderect(player.rect):
                 if player.direction.x > 0:
@@ -89,10 +103,9 @@ class Level():
         player.in_air = True
 
     # Checks if players y position collides with any tiles and if not touching any tiles sets player in_air True
-    def vert_collisons(self):
+    def vert_tiles_collide(self):
         player = self.player.sprite
         player.apply_grav()
-
         for tile in self.tiles.sprites():
             if tile.rect.colliderect(player.rect):
                 if player.direction.y > 0:
@@ -104,8 +117,8 @@ class Level():
                     player.rect.top = tile.rect.bottom
                     player.direction.y = 0
                     return None
-
         player.in_air = True
+
 
 class Tile(pygame.sprite.Sprite):
     # Creates a block with an image specified by name and places it in a group(s)
