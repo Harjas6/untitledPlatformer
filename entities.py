@@ -18,6 +18,9 @@ class Player(pygame.sprite.Sprite):
         self.in_air = True
         self.gravity = 0.8
         self.health = 3
+        self.invincible = False
+        self.time = pygame.time.get_ticks()
+
 
     # Loads all converted png and places in dictionary
     def load_pngs(self):
@@ -77,6 +80,20 @@ class Player(pygame.sprite.Sprite):
     # Adds jump speed to player direction to simulate jump
     def jump(self):
         self.direction.y = self.jump_speed
+
+    # Makes player invincible for time period
+    def invincible_status(self):
+        if self.invincible:
+            time_passed = pygame.time.get_ticks() - self.time
+            if time_passed > 2000:
+                self.invincible = False
+                self.time = pygame.time.get_ticks()
+        return self.is_dead()
+
+    def is_dead(self):
+        if self.health == 0:
+            return True
+        else: return False
 
     # If player in air runs jump animations otherwise runs animation according to direction
     def cycle_img(self, key, anim_speed=0.15):

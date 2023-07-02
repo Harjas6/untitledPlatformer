@@ -18,10 +18,13 @@ class Game():
                     pygame.quit()
                     sys.exit()
             self.screen.fill('blue')
-            self.level.run()
-            self.clock.tick(FPS)
-            pygame.display.update()
-
+            if not self.level.game_over:
+                self.level.run()
+                self.clock.tick(FPS)
+                pygame.display.update()
+            else:
+                self.screen.fill('blue')
+                pygame.display.update()
 
 
 if __name__ == '__main__':

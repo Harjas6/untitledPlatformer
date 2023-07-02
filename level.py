@@ -9,6 +9,7 @@ from settings import *
 class Level():
     def __init__(self):
         self.display = pygame.display.get_surface()
+        self.game_over = False
         self.tmx_data = load_pygame('level/tmx/untitledPlatformerTile1.tmx')
         self.tiles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
@@ -50,8 +51,7 @@ class Level():
 
         # Updates player position and collisons
         self.player.update()
-        self.horiz_collisons()
-        self.vert_collisons()
+        self.collisons()
         self.player.draw(self.display)
 
     # Draws amnount if health on screen
@@ -97,13 +97,11 @@ class Level():
         else:
             self.world_shift.y = 0
 
-    # All horizontal collsions
-    def horiz_collisons(self):
+    # All collsions
+    def collisons(self):
         self.horiz_tiles_collide()
-
-    # All vertical collsions
-    def vert_collisons(self):
         self.vert_tiles_collide()
+        self.enemies_collision()
 
     # Checks if players x position collides with any tiles and if not touching any tiles sets player in_air True
     def horiz_tiles_collide(self):
@@ -136,7 +134,15 @@ class Level():
                     return None
         player.in_air = True
 
-
+    def enemies_collision(self):
+        player = self.player.sprite
+        for enemy in self.enemies.sprites():
+            if enemy.rect.colliderect(player.rect) and not player.invincible:
+                player.health -= 1
+                player.invincible = True
+        player_dead = player.invincible_status()
+        if player_dead:
+            self.game_over = True
 
 class Tile(pygame.sprite.Sprite):
     # Creates a block with an image specified by name and places it in a group(s)
