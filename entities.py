@@ -1,7 +1,5 @@
 import math
 import pygame
-
-import debugger
 from settings import *
 
 
@@ -19,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_speed = -16
         self.in_air = True
         self.gravity = 0.8
+        self.health = 3
 
     # Loads all converted png and places in dictionary
     def load_pngs(self):
@@ -45,7 +44,6 @@ class Player(pygame.sprite.Sprite):
     # Grabs user input
     def update(self):
         self.input()
-
 
     # Moves player
     def move(self):
