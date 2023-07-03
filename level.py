@@ -136,11 +136,13 @@ class Level():
 
     def enemies_collision(self):
         player = self.player.sprite
+
         for enemy in self.enemies.sprites():
             if enemy.rect.colliderect(player.rect) and not player.invincible:
+                player.time = pygame.time.get_ticks()
                 player.health -= 1
                 player.invincible = True
-        player_dead = player.invincible_status()
+        player_dead = player.is_dead()
         if player_dead:
             self.game_over = True
 

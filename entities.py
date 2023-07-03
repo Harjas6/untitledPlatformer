@@ -19,7 +19,6 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.8
         self.health = 3
         self.invincible = False
-        self.time = pygame.time.get_ticks()
 
 
     # Loads all converted png and places in dictionary
@@ -47,6 +46,7 @@ class Player(pygame.sprite.Sprite):
     # Grabs user input
     def update(self):
         self.input()
+        self.invincible_status()
 
     # Moves player
     def move(self):
@@ -87,9 +87,8 @@ class Player(pygame.sprite.Sprite):
             time_passed = pygame.time.get_ticks() - self.time
             if time_passed > 2000:
                 self.invincible = False
-                self.time = pygame.time.get_ticks()
-        return self.is_dead()
 
+    # returen true if health == 0
     def is_dead(self):
         if self.health == 0:
             return True
