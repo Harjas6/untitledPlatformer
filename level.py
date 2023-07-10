@@ -14,11 +14,11 @@ class Level():
         self.tiles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.enemies = pygame.sprite.Group()
-        self.create_level()
         self.world_shift = pygame.math.Vector2()
         self.shift_amount = 8
         self.heart = pygame.image.load('images/heart.png')
         self.heart = pygame.transform.scale(self.heart, (48,48))
+        self.create_level()
 
     # Reads tmx file to create level
     def create_level(self):
@@ -28,9 +28,12 @@ class Level():
                 for x, y, surf in layer.tiles():
                     pos = (x * 32, y * 32)
                     self.tiles.add(Tile(pos=pos, surf=surf))
-        self.player.add(Player((300,650)))
-        self.enemies.add(Enemy((300,650),1000))
+        self.player.add(Player((300,900)))
+        self.enemies.add(Enemy((400,1600),1000))
         self.tiles.draw(self.display)
+
+
+
 
     # Runs the level
     def run(self):
@@ -38,8 +41,6 @@ class Level():
         # scroll camera
         self.scroll_cam()
 
-        # draws health
-        self.draw_health()
 
         # updates tiles
         self.tiles.update(self.world_shift)
@@ -53,6 +54,9 @@ class Level():
         self.player.update()
         self.collisons()
         self.player.draw(self.display)
+
+        # draws health
+        self.draw_health()
 
     # Draws amnount if health on screen
     def draw_health(self):

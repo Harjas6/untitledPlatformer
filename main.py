@@ -23,7 +23,10 @@ class Game():
                 self.clock.tick(FPS)
                 pygame.display.update()
             else:
+                game_over = pygame.image.load('images/game_over.png')
+                game_over = pygame.transform.scale(game_over, (512,256))
                 self.screen.fill('blue')
+                self.screen.blit(game_over, (WIDTH/3, HEIGHT/3))
                 pygame.display.update()
 
 
