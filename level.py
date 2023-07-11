@@ -18,22 +18,31 @@ class Level():
         self.shift_amount = 8
         self.heart = pygame.image.load('images/heart.png')
         self.heart = pygame.transform.scale(self.heart, (48,48))
+        self.start_time = pygame.time.get_ticks()
         self.create_level()
 
     # Reads tmx file to create level
     def create_level(self):
         layers = self.tmx_data.visible_layers
+        level = 0
         for layer in layers:
+            level += 1
             if hasattr(layer, 'data'):
                 for x, y, surf in layer.tiles():
-                    pos = (x * 32, y * 32)
-                    self.tiles.add(Tile(pos=pos, surf=surf))
+                    match level:
+                        case 1:
+                            pos = (x * 32, y * 32)
+                            self.tiles.add(Tile(pos=pos, surf=surf))
+                        case 2:
+                            pos = (x * 32, y * 32)
+                            self.enemies.add(Enemy(pos, 2500))
+                        case 3:
+                            pos = (x * 32, y * 32)
+                            self.enemies.add(Enemy(pos, 1, speed = 1))
+
+
         self.player.add(Player((300,900)))
-        self.enemies.add(Enemy((400,1600),1000))
         self.tiles.draw(self.display)
-
-
-
 
     # Runs the level
     def run(self):
@@ -50,8 +59,9 @@ class Level():
         self.enemies.update(self.world_shift)
         self.enemies.draw(self.display)
 
-        # Updates player position and collisons
-        self.player.update()
+        # Updates player position and collisons; doesn't let player move until on screen
+        if pygame.time.get_ticks() - self.start_time > 3000:
+            self.player.update()
         self.collisons()
         self.player.draw(self.display)
 
@@ -95,7 +105,7 @@ class Level():
         if player_y < HEIGHT*1/5 and direct_y < 0:
             self.world_shift.y = self.shift_amount
             player.rect.y += self.shift_amount
-        elif player_y > HEIGHT*5/6:
+        elif player_y > HEIGHT*3/5:
             self.world_shift.y = -self.shift_amount
             player.rect.y += -self.shift_amount
         else:

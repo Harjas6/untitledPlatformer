@@ -112,7 +112,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos, patrol_time):
+    def __init__(self, pos, patrol_time, speed = 2):
         super().__init__()
         self.image = pygame.image.load('images/groundL_enemy.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (64, 64))
@@ -120,7 +120,7 @@ class Enemy(pygame.sprite.Sprite):
         self.patrol_time = patrol_time
         self.time_passed = pygame.time.get_ticks()
         self.direction = 1
-        self.speed = 3
+        self.speed = speed
         self.patrol_end = False
 
 
