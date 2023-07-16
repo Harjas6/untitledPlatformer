@@ -1,5 +1,7 @@
 import sys
 import pygame
+
+import debugger
 from level import Level
 from settings import *
 

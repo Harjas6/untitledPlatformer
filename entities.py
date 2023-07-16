@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_speed = -16
         self.in_air = True
         self.gravity = 0.8
-        self.health = 3
+        self.health = 10
         self.invincible = False
 
 
@@ -112,7 +112,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos, patrol_time, speed = 2):
+    def __init__(self, pos, patrol_time, speed = 4):
         super().__init__()
         self.image = pygame.image.load('images/groundL_enemy.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (64, 64))

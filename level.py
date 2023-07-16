@@ -14,6 +14,7 @@ class Level():
         self.tiles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.enemies = pygame.sprite.Group()
+        self.teleport_tiles = pygame.sprite.Group()
         self.world_shift = pygame.math.Vector2()
         self.shift_amount = 8
         self.heart = pygame.image.load('images/heart.png')
@@ -30,18 +31,24 @@ class Level():
             if hasattr(layer, 'data'):
                 for x, y, surf in layer.tiles():
                     match level:
+                        # level tiles
                         case 1:
                             pos = (x * 32, y * 32)
                             self.tiles.add(Tile(pos=pos, surf=surf))
+                        # ground enemies
                         case 2:
                             pos = (x * 32, y * 32)
-                            self.enemies.add(Enemy(pos, 2500))
+                            self.enemies.add(Enemy(pos, 1250))
+                        # projectile enemies
                         case 3:
                             pos = (x * 32, y * 32)
                             self.enemies.add(Enemy(pos, 1, speed = 1))
+                        # teleport locations
+                        case 4:
+                            pos = (x * 32, y * 32)
+                            self.teleport_tiles.add(Tile(pos=pos, surf=surf))
 
-
-        self.player.add(Player((300,900)))
+        self.player.add(Player((300, 900)))
         self.tiles.draw(self.display)
 
     # Runs the level
@@ -51,17 +58,26 @@ class Level():
         self.scroll_cam()
 
 
-        # updates tiles
+        # updates world tiles
         self.tiles.update(self.world_shift)
         self.tiles.draw(self.display)
 
-        # enemies
+        # updates and draws teleport spot
+        self.teleport_tiles.update(self.world_shift)
+        self.teleport_tiles.draw(self.display)
+
+
+        # update enemies
         self.enemies.update(self.world_shift)
         self.enemies.draw(self.display)
 
         # Updates player position and collisons; doesn't let player move until on screen
         if pygame.time.get_ticks() - self.start_time > 3000:
             self.player.update()
+
+        if self.teleport_player():
+            self.adjust_screen()
+
         self.collisons()
         self.player.draw(self.display)
 
@@ -110,6 +126,35 @@ class Level():
             player.rect.y += -self.shift_amount
         else:
             self.world_shift.y = 0
+
+    def adjust_screen(self):
+        player = self.player.sprite
+        start = pygame.time.get_ticks()
+
+        while pygame.time.get_ticks() - start < 1050:
+            player.direction.y = -1
+            player.direction.x = 0
+            self.display.fill('blue')
+            self.scroll_cam()
+            # updates world tiles
+            self.tiles.update(self.world_shift)
+            self.tiles.draw(self.display)
+
+            # updates and draws teleport spot
+            self.teleport_tiles.update(self.world_shift)
+            self.teleport_tiles.draw(self.display)
+
+            # update enemies
+            self.enemies.update(self.world_shift)
+            self.enemies.draw(self.display)
+
+            self.collisons()
+            self.player.draw(self.display)
+
+            # draws health
+            self.draw_health()
+
+            pygame.display.update()
 
     # All collsions
     def collisons(self):
@@ -160,14 +205,36 @@ class Level():
         if player_dead:
             self.game_over = True
 
+    # if player collides with the teleport tile, transports player to new location
+    # Returns true if after teleportation, screen needs to be shifted
+    def teleport_player(self):
+        player = self.player.sprite
+        # Not confirmed but seems like Ordered from closest to player to farthest
+        teleport_locations = self.teleport_tiles.sprites()
+
+        if player.rect.colliderect(teleport_locations[3].rect):
+            new_location = teleport_locations[0].rect.x, teleport_locations[0].rect.y
+            player.rect.x = new_location[0]
+            player.rect.y = new_location[1]
+            return True
+
+        elif player.rect.colliderect(teleport_locations[2].rect):
+            new_location = teleport_locations[1].rect.x, teleport_locations[1].rect.y
+            player.rect.x = new_location[0]
+            player.rect.y = new_location[1]
+            return False
+        else:
+            return False
+
+
 class Tile(pygame.sprite.Sprite):
     # Creates a block with an image specified by name and places it in a group(s)
-    def __init__(self, pos, surf,):
+    def __init__(self, pos, surf):
         super().__init__()
         self.image = surf
         self.rect = self.image.get_rect(topleft=pos)
 
     # Moves tile according to shift
     def update(self, shift):
-        self.rect.x += shift.x
-        self.rect.y += shift.y
+        self.rect.x += shift[0]
+        self.rect.y += shift[1]
