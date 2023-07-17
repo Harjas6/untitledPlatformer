@@ -125,18 +125,19 @@ class Enemy(pygame.sprite.Sprite):
 
 
     def update(self,shift):
-        self.patrol(shift)
-
-    def patrol(self,shift):
-        if pygame.time.get_ticks() - self.time_passed > self.patrol_time:
-            self.time_passed = pygame.time.get_ticks()
-            self.patrol_end = True
         self.move(shift)
 
     def move(self, shift):
+        self.patrol()
         if self.patrol_end:
             self.direction *= -1
             self.patrol_end = False
         self.rect.x += self.direction * self.speed
-        self.rect.x += shift.x
-        self.rect.y += shift.y
+        self.rect.x += shift[0]
+        self.rect.y += shift[1]
+
+
+    def patrol(self):
+        if pygame.time.get_ticks() - self.time_passed > self.patrol_time:
+            self.time_passed = pygame.time.get_ticks()
+            self.patrol_end = True

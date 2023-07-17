@@ -38,7 +38,7 @@ class Level():
                         # ground enemies
                         case 2:
                             pos = (x * 32, y * 32)
-                            self.enemies.add(Enemy(pos, 1250))
+                            self.enemies.add(Enemy(pos, 2500, speed=2))
                         # projectile enemies
                         case 3:
                             pos = (x * 32, y * 32)
@@ -54,10 +54,23 @@ class Level():
     # Runs the level
     def run(self):
 
-        # scroll camera
         self.scroll_cam()
 
+        self.update_screen()
 
+        # doesn't let player move until on screen
+        if pygame.time.get_ticks() - self.start_time > 3000:
+            self.player.update()
+
+        self.teleport_player()
+        self.collisons()
+        self.player.draw(self.display)
+
+        # draws health overtop all objects (KEEP LAST)
+        self.draw_health()
+
+    # updates all neccessary groups
+    def update_screen(self):
         # updates world tiles
         self.tiles.update(self.world_shift)
         self.tiles.draw(self.display)
@@ -66,23 +79,9 @@ class Level():
         self.teleport_tiles.update(self.world_shift)
         self.teleport_tiles.draw(self.display)
 
-
         # update enemies
         self.enemies.update(self.world_shift)
         self.enemies.draw(self.display)
-
-        # Updates player position and collisons; doesn't let player move until on screen
-        if pygame.time.get_ticks() - self.start_time > 3000:
-            self.player.update()
-
-        if self.teleport_player():
-            self.adjust_screen()
-
-        self.collisons()
-        self.player.draw(self.display)
-
-        # draws health
-        self.draw_health()
 
     # Draws amnount if health on screen
     def draw_health(self):
@@ -95,8 +94,7 @@ class Level():
 
     # Scrolls cam in x and y directions
     def scroll_cam(self):
-        self.scroll_x()
-        self.scroll_y()
+        return self.scroll_x(), self.scroll_y()
 
     # If player is on horizontal edges of screen moves background accordingly
     def scroll_x(self):
@@ -106,6 +104,7 @@ class Level():
         if player_x < WIDTH/3 and direct_x < 0:
             self.world_shift.x = self.shift_amount
             player.rect.x += self.shift_amount
+
         elif player_x > WIDTH*2/3 and direct_x > 0:
             self.world_shift.x = -self.shift_amount
             player.rect.x += -self.shift_amount
@@ -127,34 +126,7 @@ class Level():
         else:
             self.world_shift.y = 0
 
-    def adjust_screen(self):
-        player = self.player.sprite
-        start = pygame.time.get_ticks()
 
-        while pygame.time.get_ticks() - start < 1050:
-            player.direction.y = -1
-            player.direction.x = 0
-            self.display.fill('blue')
-            self.scroll_cam()
-            # updates world tiles
-            self.tiles.update(self.world_shift)
-            self.tiles.draw(self.display)
-
-            # updates and draws teleport spot
-            self.teleport_tiles.update(self.world_shift)
-            self.teleport_tiles.draw(self.display)
-
-            # update enemies
-            self.enemies.update(self.world_shift)
-            self.enemies.draw(self.display)
-
-            self.collisons()
-            self.player.draw(self.display)
-
-            # draws health
-            self.draw_health()
-
-            pygame.display.update()
 
     # All collsions
     def collisons(self):
@@ -206,7 +178,7 @@ class Level():
             self.game_over = True
 
     # if player collides with the teleport tile, transports player to new location
-    # Returns true if after teleportation, screen needs to be shifted
+    # Returns 1 if after teleportation, screen needs to be shifted
     def teleport_player(self):
         player = self.player.sprite
         # Not confirmed but seems like Ordered from closest to player to farthest
@@ -214,17 +186,67 @@ class Level():
 
         if player.rect.colliderect(teleport_locations[3].rect):
             new_location = teleport_locations[0].rect.x, teleport_locations[0].rect.y
+            player.direction.x = 0
+            player.direction.y = 0
             player.rect.x = new_location[0]
             player.rect.y = new_location[1]
+            self.recenter(2000)
             return True
 
         elif player.rect.colliderect(teleport_locations[2].rect):
             new_location = teleport_locations[1].rect.x, teleport_locations[1].rect.y
+            player.direction.x = 0
+            player.direction.y = 0
             player.rect.x = new_location[0]
             player.rect.y = new_location[1]
-            return False
+            self.recenter(500)
+            return True
         else:
             return False
+
+    def recenter(self, length):
+        start = pygame.time.get_ticks()
+        clock = pygame.time.Clock()
+        while pygame.time.get_ticks() - start < length:
+            player = self.player.sprite
+            player_x = player.rect.centerx
+            if player_x < WIDTH / 3:
+                self.world_shift.x = self.shift_amount
+                player.rect.x += self.shift_amount
+
+            elif player_x > WIDTH * 2 / 3:
+                self.world_shift.x = -self.shift_amount
+                player.rect.x += -self.shift_amount
+
+            else:
+                self.world_shift.x = 0
+
+            player_y = player.rect.centery
+            if player_y < HEIGHT * 1 / 5:
+                self.world_shift.y = self.shift_amount
+                player.rect.y += self.shift_amount
+            elif player_y > HEIGHT * 3 / 5:
+                self.world_shift.y = -self.shift_amount
+                player.rect.y += -self.shift_amount
+            else:
+                self.world_shift.y = 0
+            self.display.fill('blue')
+            self.tiles.update(self.world_shift)
+            self.tiles.draw(self.display)
+
+            # updates and draws teleport spot
+            self.teleport_tiles.update(self.world_shift)
+            self.teleport_tiles.draw(self.display)
+
+            # update enemies
+            self.enemies.update(self.world_shift)
+            self.enemies.draw(self.display)
+            self.collisons()
+            self.player.draw(self.display)
+            self.draw_health()
+            clock.tick(FPS)
+            pygame.display.update()
+
 
 
 class Tile(pygame.sprite.Sprite):
