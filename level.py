@@ -42,7 +42,7 @@ class Level():
                         # projectile enemies
                         case 3:
                             pos = (x * 32, y * 32)
-                            self.enemies.add(Enemy(pos, 1, speed = 1))
+                            self.enemies.add(Enemy(pos, 1500, speed = 3, horizontal=False))
                         # teleport locations
                         case 4:
                             pos = (x * 32, y * 32)
