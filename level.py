@@ -12,7 +12,10 @@ class Level():
         self.game_over = False
         self.tmx_data = load_pygame('level/tmx/untitledPlatformerTile1.tmx')
         self.tiles = pygame.sprite.Group()
+        self.boundaryHoriz = pygame.sprite.Group()
+        self.boundaryVert = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
+        self.spawnPoint = pygame.sprite.GroupSingle()
         self.enemies = pygame.sprite.Group()
         self.teleport_tiles = pygame.sprite.Group()
         self.world_shift = pygame.math.Vector2()
@@ -47,8 +50,21 @@ class Level():
                         case 4:
                             pos = (x * 32, y * 32)
                             self.teleport_tiles.add(Tile(pos=pos, surf=surf))
+                        # boundary tiles
+                        case 5:
+                            pos = (x * 32, y * 32)
+                            self.boundaryHoriz.add(Tile(pos=pos, surf=surf))
+                        case 6:
+                            pos = (x * 32, y * 32)
+                            self.boundaryVert.add(Tile(pos=pos, surf=surf))
+                        # SpawnPoint
+                        case 7:
+                            pos = (x * 32, y * 32)
+                            self.spawnPoint.add(Tile(pos=pos, surf=surf))
 
-        self.player.add(Player((300, 900)))
+        x = self.spawnPoint.sprite.rect.x
+        y = self.spawnPoint.sprite.rect.y
+        self.player.add(Player((x,y)))
         self.tiles.draw(self.display)
 
     # Runs the level
@@ -75,6 +91,9 @@ class Level():
         self.tiles.update(self.world_shift)
         self.tiles.draw(self.display)
 
+        # keeps spawn Point in line wiht the rest of the tiles
+        self.spawnPoint.update(self.world_shift)
+
         # updates and draws teleport spot
         self.teleport_tiles.update(self.world_shift)
         self.teleport_tiles.draw(self.display)
@@ -82,6 +101,11 @@ class Level():
         # update enemies
         self.enemies.update(self.world_shift)
         self.enemies.draw(self.display)
+
+        # Updates both boundary's but keeps it invisible
+        self.boundaryHoriz.update(self.world_shift)
+        self.boundaryVert.update(self.world_shift)
+
 
     # Draws amnount if health on screen
     def draw_health(self):
@@ -133,6 +157,8 @@ class Level():
         self.horiz_tiles_collide()
         self.vert_tiles_collide()
         self.enemies_collision()
+        self.boundary_collisons()
+
 
     # Checks if players x position collides with any tiles and if not touching any tiles sets player in_air True
     def horiz_tiles_collide(self):
@@ -171,17 +197,74 @@ class Level():
         for enemy in self.enemies.sprites():
             if enemy.rect.colliderect(player.rect) and not player.invincible:
                 player.time = pygame.time.get_ticks()
+                player.health -= enemy.dmg
+                player.invincible = True
+            player_dead = player.is_dead()
+            if player_dead:
+                self.game_over = True
+
+    def boundary_collisons(self):
+        self.sideBoundary()
+        self.bottomBoundary()
+
+    def sideBoundary(self):
+        player = self.player.sprite
+
+        for tile in self.boundaryVert.sprites():
+            if tile.rect.colliderect(player.rect):
+                if player.direction.x > 0:
+                    player.rect.right = tile.rect.left
+                    return None
+                elif player.direction.x < 0:
+                    player.rect.left = tile.rect.right
+                    return None
+
+
+    def bottomBoundary(self):
+        player = self.player.sprite
+        for tile in self.boundaryHoriz.sprites():
+            if tile.rect.colliderect(player.rect):
+                player.time = pygame.time.get_ticks()
                 player.health -= 1
                 player.invincible = True
-        player_dead = player.is_dead()
-        if player_dead:
-            self.game_over = True
+                x = self.spawnPoint.sprite.rect.x
+                y = self.spawnPoint.sprite.rect.y
+                player.rect.x = x
+                player.rect.y = y
+                length = self.calculate_center_time(tile,x,y)
+                self.recenter(length)
+            player_dead = player.is_dead()
+            if player_dead:
+                self.game_over = True
+
+    def calculate_center_time(self, tile,x,y):
+        tilex = tile.rect.x
+        tiley = tile.rect.y
+        x_dist = abs(tilex - x)
+        y_dist = abs(tiley - y)
+
+        if max(x_dist,y_dist) < 10*32:
+            return 500
+        elif max(x_dist,y_dist) < 30*32:
+            return 1000
+        elif max(x_dist,y_dist) < 50*32:
+            return 2500
+        elif max(x_dist, y_dist) < 70 * 32:
+            return 4250
+        else:
+            return 6000
+
+
+
+
+
 
     # if player collides with the teleport tile, transports player to new location
-    # Returns 1 if after teleportation, screen needs to be shifted
+    # Returns True if after teleportation, screen needs to be shifted
     def teleport_player(self):
         player = self.player.sprite
-        # Not confirmed but seems like Ordered from closest to player to farthest
+        # Not confirmed but seems like Ordered with index 0 being farthest
+        # from bottom left(when viewed on Tiled)
         teleport_locations = self.teleport_tiles.sprites()
 
         if player.rect.colliderect(teleport_locations[3].rect):
@@ -209,6 +292,8 @@ class Level():
         clock = pygame.time.Clock()
         while pygame.time.get_ticks() - start < length:
             player = self.player.sprite
+            player.direction.x = 0
+            player.direction.y = 0
             player_x = player.rect.centerx
             if player_x < WIDTH / 3:
                 self.world_shift.x = self.shift_amount
@@ -231,16 +316,7 @@ class Level():
             else:
                 self.world_shift.y = 0
             self.display.fill('blue')
-            self.tiles.update(self.world_shift)
-            self.tiles.draw(self.display)
-
-            # updates and draws teleport spot
-            self.teleport_tiles.update(self.world_shift)
-            self.teleport_tiles.draw(self.display)
-
-            # update enemies
-            self.enemies.update(self.world_shift)
-            self.enemies.draw(self.display)
+            self.update_screen()
             self.collisons()
             self.player.draw(self.display)
             self.draw_health()
