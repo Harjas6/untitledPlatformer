@@ -8,7 +8,7 @@ class Game():
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT),pygame.DOUBLEBUF)
-        self.level = Level()
+        self.level = Level('level/tmx/untitledPlatformerTile1.tmx')
         self.clock = pygame.time.Clock()
 
     def run(self):

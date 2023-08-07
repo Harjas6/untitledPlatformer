@@ -1,16 +1,25 @@
 import pygame
 from pytmx import load_pygame
 
-import debugger
 from entities import Player, Enemy
 from settings import *
 
 
 class Level():
-    def __init__(self):
+    def __init__(self, level_file):
         self.display = pygame.display.get_surface()
         self.game_over = False
-        self.tmx_data = load_pygame('level/tmx/untitledPlatformerTile1.tmx')
+        self.tmx_data = load_pygame(level_file)
+        self.make_groups()
+        self.world_shift = pygame.math.Vector2()
+        self.shift_amount = 8
+        self.heart = pygame.image.load('images/heart.png')
+        self.heart = pygame.transform.scale(self.heart, (48,48))
+        self.start_time = pygame.time.get_ticks()
+        self.create_level()
+
+    # Makes groups and attributes
+    def make_groups(self):
         self.tiles = pygame.sprite.Group()
         self.boundaryHoriz = pygame.sprite.Group()
         self.boundaryVert = pygame.sprite.Group()
@@ -18,12 +27,6 @@ class Level():
         self.spawnPoint = pygame.sprite.GroupSingle()
         self.enemies = pygame.sprite.Group()
         self.teleport_tiles = pygame.sprite.Group()
-        self.world_shift = pygame.math.Vector2()
-        self.shift_amount = 8
-        self.heart = pygame.image.load('images/heart.png')
-        self.heart = pygame.transform.scale(self.heart, (48,48))
-        self.start_time = pygame.time.get_ticks()
-        self.create_level()
 
     # Reads tmx file to create level
     def create_level(self):
@@ -231,32 +234,31 @@ class Level():
                 y = self.spawnPoint.sprite.rect.y
                 player.rect.x = x
                 player.rect.y = y
-                length = self.calculate_center_time(tile,x,y)
+                length = self.calculate_center_time(tile)
                 self.recenter(length)
             player_dead = player.is_dead()
             if player_dead:
                 self.game_over = True
 
-    def calculate_center_time(self, tile,x,y):
+    def calculate_center_time(self, tile,):
         tilex = tile.rect.x
         tiley = tile.rect.y
+        x = self.spawnPoint.sprite.rect.x
+        y = self.spawnPoint.sprite.rect.y
         x_dist = abs(tilex - x)
         y_dist = abs(tiley - y)
 
-        if max(x_dist,y_dist) < 10*32:
+        if max(x_dist,y_dist) < 20*32:
             return 500
-        elif max(x_dist,y_dist) < 30*32:
+        elif max(x_dist,y_dist) < 40*32:
             return 1000
-        elif max(x_dist,y_dist) < 50*32:
-            return 2500
-        elif max(x_dist, y_dist) < 70 * 32:
-            return 4250
-        else:
-            return 6000
-
-
-
-
+        elif max(x_dist,y_dist) < 60*32:
+            return 1800
+        elif max(x_dist,y_dist) < 80*32:
+            return 3500
+        elif max(x_dist,y_dist) < 100*32:
+            return 7000
+        else: return 8000
 
 
     # if player collides with the teleport tile, transports player to new location
@@ -288,10 +290,15 @@ class Level():
             return False
 
     def recenter(self, length):
+        player = self.player.sprite
+        player.is_dead()
+        if player.is_dead():
+            self.game_over = True
+            return None
         start = pygame.time.get_ticks()
         clock = pygame.time.Clock()
         while pygame.time.get_ticks() - start < length:
-            player = self.player.sprite
+
             player.direction.x = 0
             player.direction.y = 0
             player_x = player.rect.centerx
