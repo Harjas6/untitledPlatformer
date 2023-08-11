@@ -1,14 +1,14 @@
 import sys
 import pygame
 
-from level import Level
+from level import *
 from settings import *
 
 class Game():
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT),pygame.DOUBLEBUF)
-        self.level = Level('level/tmx/untitledPlatformerTile1.tmx')
+        self.level = Level_1('level/tmx/untitledPlatformerTile1.tmx')
         self.clock = pygame.time.Clock()
 
     def run(self):
