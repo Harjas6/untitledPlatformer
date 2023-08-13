@@ -1,11 +1,13 @@
 import pygame
 from pytmx import load_pygame
 
+import debugger
 from entities import Player, Enemy
 from settings import *
 
 class Level():
     def __init__(self, level_file):
+        self.clock = pygame.time.Clock()
         self.display = pygame.display.get_surface()
         self.game_over = False
         self.tmx_data = load_pygame(level_file)
@@ -39,7 +41,6 @@ class Level():
 
     # Runs the level
     def run(self):
-
         self.scroll_cam()
         self.update_screen()
 
@@ -53,6 +54,7 @@ class Level():
 
         # draws health overtop all objects (KEEP LAST)
         self.draw_health()
+        debugger.debug(self.player.sprite.rect)
 
     # Scrolls cam in x and y directions
     def scroll_cam(self):
@@ -133,7 +135,7 @@ class Level():
             self.game_over = True
             return None
         start = pygame.time.get_ticks()
-        clock = pygame.time.Clock()
+
         while pygame.time.get_ticks() - start < length:
 
             player.direction.x = 0
@@ -164,14 +166,16 @@ class Level():
             self.collisons()
             self.player.draw(self.display)
             self.draw_health()
-            clock.tick(FPS)
+            self.clock.tick(FPS)
             pygame.display.update()
 
-    def calculate_center_time(self, tile,):
+
+    def calculate_center_time(self, tile):
         tilex = tile.rect.x
         tiley = tile.rect.y
-        x = self.spawnPoint.sprite.rect.x
-        y = self.spawnPoint.sprite.rect.y
+        spawn_point = self.get_point()
+        x = spawn_point.rect.x
+        y = spawn_point.rect.y
         x_dist = abs(tilex - x)
         y_dist = abs(tiley - y)
 

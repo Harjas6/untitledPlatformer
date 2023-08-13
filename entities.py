@@ -19,6 +19,8 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.8
         self.health = 5
         self.invincible = False
+        self.can_dash = True
+        self.time = pygame.time.get_ticks()
 
 
     # Loads all converted png and places in dictionary
@@ -76,10 +78,21 @@ class Player(pygame.sprite.Sprite):
             if not self.in_air:
                 self.jump()
                 self.in_air = True
+        if keys[pygame.K_x] and self.can_dash:
+            self.dash()
 
     # Adds jump speed to player direction to simulate jump
     def jump(self):
         self.direction.y = self.jump_speed
+
+    # Causes player character to dash
+    def dash(self):
+        dist = 200
+        if pygame.time.get_ticks() - self.time > 700:
+            if self.direction.x == 0:
+                self.rect.x += dist
+            else: self.rect.x += self.direction.x * dist
+            self.time = pygame.time.get_ticks()
 
     # Makes player invincible for time period
     def invincible_status(self):
@@ -88,7 +101,7 @@ class Player(pygame.sprite.Sprite):
             if time_passed > 2000:
                 self.invincible = False
 
-    # returen true if health == 0
+    # return true if health == 0
     def is_dead(self):
         if self.health == 0:
             return True

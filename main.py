@@ -1,6 +1,7 @@
 import sys
 import pygame
 
+import debugger
 from level import *
 from settings import *
 
@@ -20,6 +21,7 @@ class Game():
             self.screen.fill('blue')
             if not self.level.game_over:
                 self.level.run()
+
                 self.clock.tick(FPS)
                 pygame.display.update()
             else:
