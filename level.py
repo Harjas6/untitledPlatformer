@@ -169,16 +169,16 @@ class Level():
                 player.rect.y += -self.shift_amount
             else:
                 self.world_shift.y = 0
-            self.run_no_input(100)
+            self.run_no_input()
 
 
-    def run_no_input(self, fps):
+    def run_no_input(self):
         self.display.fill('blue')
         self.update_screen()
         self.collisons()
         self.player.draw(self.display)
         self.draw_health()
-        self.clock.tick(fps)
+        self.clock.tick(FPS)
         pygame.display.update()
 
     def calculate_center_time(self, tile):
@@ -287,6 +287,7 @@ class Level_1(Level):
                         # SpawnPoint
                         case 7:
                             pos = (x * 32, y * 32)
+
                             self.spawnPoint.add(Tile(pos=pos, surf=surf))
                         # Where level ends
                         case 8:
