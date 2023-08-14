@@ -9,6 +9,7 @@ class Level():
     def __init__(self, level_file):
         self.clock = pygame.time.Clock()
         self.display = pygame.display.get_surface()
+        self.next_level = False
         self.game_over = False
         self.tmx_data = load_pygame(level_file)
         self.start_delay = 3000
@@ -41,12 +42,13 @@ class Level():
 
     # Runs the level
     def run(self):
+        self.level_end()
         self.scroll_cam()
         self.update_screen()
 
         # doesn't let player move until on screen
         if pygame.time.get_ticks() - self.start_time > self.start_delay:
-            self.player.update()
+             self.player.update()
 
         self.teleport_player()
         self.collisons()
@@ -54,14 +56,13 @@ class Level():
 
         # draws health overtop all objects (KEEP LAST)
         self.draw_health()
-        debugger.debug(self.player.sprite.rect)
+
 
     # Scrolls cam in x and y directions
     def scroll_cam(self):
         return self.scroll_x(), self.scroll_y()
 
-        # If player is on horizontal edges of screen moves background accordingly
-
+    # If player is on horizontal edges of screen moves background accordingly
     def scroll_x(self):
         player = self.player.sprite
         player_x = player.rect.centerx
@@ -77,8 +78,7 @@ class Level():
         else:
             self.world_shift.x = 0
 
-        # If player is on vertical edges of screen moves background accordingly
-
+    # If player is on vertical edges of screen moves background accordingly
     def scroll_y(self):
         player = self.player.sprite
         player_y = player.rect.centery
@@ -94,6 +94,14 @@ class Level():
 
     def collisons(self):
         pass
+
+    # Checks if at end of level
+    def level_end(self):
+        end_tile = self.endpoint.sprite
+        player = self.player.sprite
+        if end_tile.rect.colliderect(player.rect):
+            self.next_level = True
+
 
     # Checks if players x position collides with any tiles and if not touching any tiles sets player in_air True
     def horiz_tiles_collide(self):
@@ -161,14 +169,17 @@ class Level():
                 player.rect.y += -self.shift_amount
             else:
                 self.world_shift.y = 0
-            self.display.fill('blue')
-            self.update_screen()
-            self.collisons()
-            self.player.draw(self.display)
-            self.draw_health()
-            self.clock.tick(FPS)
-            pygame.display.update()
+            self.run_no_input(100)
 
+
+    def run_no_input(self, fps):
+        self.display.fill('blue')
+        self.update_screen()
+        self.collisons()
+        self.player.draw(self.display)
+        self.draw_health()
+        self.clock.tick(fps)
+        pygame.display.update()
 
     def calculate_center_time(self, tile):
         tilex = tile.rect.x
@@ -239,6 +250,7 @@ class Level_1(Level):
         self.spawnPoint = pygame.sprite.GroupSingle()
         self.enemies = pygame.sprite.Group()
         self.teleport_tiles = pygame.sprite.Group()
+        self.endpoint = pygame.sprite.GroupSingle()
 
     # Reads tmx file to create level
     def create_level(self):
@@ -276,6 +288,10 @@ class Level_1(Level):
                         case 7:
                             pos = (x * 32, y * 32)
                             self.spawnPoint.add(Tile(pos=pos, surf=surf))
+                        # Where level ends
+                        case 8:
+                            pos = (x * 32, y * 32)
+                            self.endpoint.add(Tile(pos=pos, surf=surf))
 
         x = self.spawnPoint.sprite.rect.x
         y = self.spawnPoint.sprite.rect.y
@@ -291,6 +307,10 @@ class Level_1(Level):
 
         # keeps spawn Point in line wiht the rest of the tiles
         self.spawnPoint.update(self.world_shift)
+
+        # keeps end Point in line wiht the rest of the tiles
+        self.endpoint.update(self.world_shift)
+        self.endpoint.draw(self.display)
 
         # updates and draws teleport spot
         self.teleport_tiles.update(self.world_shift)

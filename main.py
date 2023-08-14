@@ -21,16 +21,22 @@ class Game():
             self.screen.fill('blue')
             if not self.level.game_over:
                 self.level.run()
-
                 self.clock.tick(FPS)
                 pygame.display.update()
             else:
-                game_over = pygame.image.load('images/game_over.png')
-                game_over = pygame.transform.scale(game_over, (512,256))
+                game_over = pygame.image.load('images/games_over.png')
                 self.screen.fill('blue')
                 self.screen.blit(game_over, (WIDTH/3, HEIGHT/3))
+                self.handle_keys()
                 pygame.display.update()
 
+    def handle_keys(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_r]:
+            self.level = Level_1('level/tmx/untitledPlatformerTile1.tmx')
+        elif keys[pygame.K_q]:
+            pygame.quit()
+            sys.exit()
 
 if __name__ == '__main__':
     game = Game()
