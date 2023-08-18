@@ -265,11 +265,11 @@ class Level_1(Level):
                         case 1:
                             pos = (x * 32, y * 32)
                             self.tiles.add(Tile(pos=pos, surf=surf))
-                        # ground enemies
+                        # horizontal enemies
                         case 2:
                             pos = (x * 32, y * 32)
                             self.enemies.add(Enemy(pos, 2500, speed=2))
-                        # projectile enemies
+                        # vertical enemies
                         case 3:
                             pos = (x * 32, y * 32)
                             self.enemies.add(Enemy(pos, 1500, speed = 3, horizontal=False))

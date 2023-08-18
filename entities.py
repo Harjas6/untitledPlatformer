@@ -1,5 +1,6 @@
 import math
 import pygame
+from random import randint
 from settings import *
 
 
@@ -134,10 +135,12 @@ class Enemy(pygame.sprite.Sprite):
         self.patrol_time = patrol_time
         self.time_passed = pygame.time.get_ticks()
         self.direction = 1
-        self.dmg = dmg
         self.speed = speed
         self.horizontal = horizontal
-        self.patrol_end = False
+
+        # dmg included in case I want to refactor enemies into having different amounts of damages
+        self.dmg = dmg
+
 
 
     def update(self,shift):
@@ -145,9 +148,6 @@ class Enemy(pygame.sprite.Sprite):
 
     def move(self, shift):
         self.patrol()
-        if self.patrol_end:
-            self.direction *= -1
-            self.patrol_end = False
         if self.horizontal:
             self.rect.x += self.direction * self.speed
             self.rect.x += shift[0]
@@ -161,4 +161,6 @@ class Enemy(pygame.sprite.Sprite):
     def patrol(self):
         if pygame.time.get_ticks() - self.time_passed > self.patrol_time:
             self.time_passed = pygame.time.get_ticks()
-            self.patrol_end = True
+            self.direction *= -1
+
+
