@@ -25,7 +25,7 @@ class Level():
         self.start_time = pygame.time.get_ticks()
         self.create_level()
 
-    # Makes groups needed for level. Will be specific to each level
+    # Makes groups needed for level2. Will be specific to each level2
     def make_groups(self):
         pass
     def create_level(self):
@@ -40,7 +40,7 @@ class Level():
             self.display.blit(self.heart, (offset, 10))
             offset += 58
 
-    # Runs the level
+    # Runs the level2
     def run(self):
         self.level_end()
         self.scroll_cam()
@@ -95,7 +95,7 @@ class Level():
     def collisons(self):
         pass
 
-    # Checks if at end of level
+    # Checks if at end of level2
     def level_end(self):
         end_tile = self.endpoint.sprite
         player = self.player.sprite
@@ -239,7 +239,7 @@ class Level():
     def get_point(self):
         return self.spawnPoint.sprite
 
-class Level_1(Level):
+class Level_2(Level):
 
     # Makes groups and attributes
     def make_groups(self):
@@ -252,7 +252,7 @@ class Level_1(Level):
         self.teleport_tiles = pygame.sprite.Group()
         self.endpoint = pygame.sprite.GroupSingle()
 
-    # Reads tmx file to create level
+    # Reads tmx file to create level2
     def create_level(self):
         layers = self.tmx_data.visible_layers
         level = 0
@@ -261,7 +261,7 @@ class Level_1(Level):
             if hasattr(layer, 'data'):
                 for x, y, surf in layer.tiles():
                     match level:
-                        # level tiles
+                        # level2 tiles
                         case 1:
                             pos = (x * 32, y * 32)
                             self.tiles.add(Tile(pos=pos, surf=surf))
@@ -289,7 +289,7 @@ class Level_1(Level):
                             pos = (x * 32, y * 32)
 
                             self.spawnPoint.add(Tile(pos=pos, surf=surf))
-                        # Where level ends
+                        # Where level2 ends
                         case 8:
                             pos = (x * 32, y * 32)
                             self.endpoint.add(Tile(pos=pos, surf=surf))

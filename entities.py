@@ -40,7 +40,7 @@ class Player(pygame.sprite.Sprite):
     def png_loader(self, names):
         animations = []
         for name in names:
-            img = pygame.image.load(f"images/{name}.png").convert_alpha()
+            img = pygame.image.load(f"images/player/{name}.png").convert_alpha()
             img = pygame.transform.scale(img, (64, 64))
             animations.append(img)
 
