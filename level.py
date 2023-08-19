@@ -6,13 +6,13 @@ from entities import Player, Enemy
 from settings import *
 
 class Level():
-    def __init__(self, level_file):
+    def __init__(self, level_file,start_delay):
         self.clock = pygame.time.Clock()
         self.display = pygame.display.get_surface()
         self.next_level = False
         self.game_over = False
         self.tmx_data = load_pygame(level_file)
-        self.start_delay = 3000
+        self.start_delay = start_delay
 
         self.make_groups()
 
@@ -239,9 +239,125 @@ class Level():
     def get_point(self):
         return self.spawnPoint.sprite
 
+class Level_0(Level):
+
+    def make_groups(self):
+        self.tiles = pygame.sprite.Group()
+        self.boundaryHoriz = pygame.sprite.Group()
+        self.boundaryVert = pygame.sprite.Group()
+        self.player = pygame.sprite.GroupSingle()
+        self.spawnPoint = pygame.sprite.GroupSingle()
+        self.enemies = pygame.sprite.Group()
+        self.teleport_tiles = pygame.sprite.Group()
+        self.endpoint = pygame.sprite.GroupSingle()
+        self.tutorial_locations = pygame.sprite.Group()
+
+    # Reads tmx file to create level0
+    def create_level(self):
+        layers = self.tmx_data.visible_layers
+        level = 0
+        for layer in layers:
+            level += 1
+            if hasattr(layer, 'data'):
+                for x, y, surf in layer.tiles():
+                    match level:
+                        # level tiles
+                        case 1:
+                            pos = (x * 32, y * 32)
+                            self.tiles.add(Tile(pos=pos, surf=surf))
+                        # enemies
+                        case 2:
+                            pos = (x * 32, y * 32)
+                            self.enemies.add(Enemy(pos, 1500, speed=3))
+                        # teleport locations
+                        case 3:
+                            pos = (x * 32, y * 32)
+                            self.teleport_tiles.add(Tile(pos=pos, surf=surf))
+                        # boundary tiles
+                        case 4:
+                            pos = (x * 32, y * 32)
+                            self.boundaryHoriz.add(Tile(pos=pos, surf=surf))
+                        case 5:
+                            pos = (x * 32, y * 32)
+                            self.boundaryVert.add(Tile(pos=pos, surf=surf))
+                        # SpawnPoint
+                        case 6:
+                            pos = (x * 32, y * 32)
+                            self.spawnPoint.add(Tile(pos=pos, surf=surf))
+                        # Where level ends
+                        case 7:
+                            pos = (x * 32, y * 32)
+                            self.endpoint.add(Tile(pos=pos, surf=surf))
+                        # instruction locations
+                        case 8:
+                            pos = (x * 32, y * 32)
+                            self.tutorial_locations.add(Tile(pos=pos, surf=surf))
+        x = self.spawnPoint.sprite.rect.x
+        y = self.spawnPoint.sprite.rect.y
+        self.player.add(Player((x, y)))
+        self.tiles.draw(self.display)
+
+
+
+    def update_screen(self):
+        # updates world tiles
+        self.tiles.update(self.world_shift)
+        self.tiles.draw(self.display)
+
+        # keeps spawn Point in line wiht the rest of the tiles
+        self.spawnPoint.update(self.world_shift)
+
+        # keeps end Point in line wiht the rest of the tiles
+        self.endpoint.update(self.world_shift)
+        self.endpoint.draw(self.display)
+
+        # updates and draws teleport spot
+        self.teleport_tiles.update(self.world_shift)
+        self.teleport_tiles.draw(self.display)
+
+        # update enemies
+        self.enemies.update(self.world_shift)
+        self.enemies.draw(self.display)
+
+        # Updates both boundary's but keeps it invisible
+        self.boundaryHoriz.update(self.world_shift)
+        self.boundaryVert.update(self.world_shift)
+
+
+    def teleport_player(self):
+        player = self.player.sprite
+        # Not confirmed but seems like Ordered with index 0 being farthest
+        # from bottom left(when viewed on Tiled)
+        teleport_locations = self.teleport_tiles.sprites()
+
+        if player.rect.colliderect(teleport_locations[1].rect):
+            new_location = teleport_locations[0].rect.x, teleport_locations[0].rect.y
+            player.direction.x = 0
+            player.direction.y = 0
+            player.rect.x = new_location[0]
+            player.rect.y = new_location[1]
+            self.recenter(10)
+
+    # All collsions
+    def collisons(self):
+        self.horiz_tiles_collide()
+        self.vert_tiles_collide()
+        self.enemies_collision()
+        self.boundary_collisons()
+
+    def enemies_collision(self):
+        player = self.player.sprite
+        for enemy in self.enemies.sprites():
+            if enemy.rect.colliderect(player.rect) and not player.invincible:
+                player.time = pygame.time.get_ticks()
+                player.health -= enemy.dmg
+                player.invincible = True
+            player_dead = player.is_dead()
+            if player_dead:
+                self.game_over = True
 class Level_2(Level):
 
-    # Makes groups and attributes
+    # Makes groups
     def make_groups(self):
         self.tiles = pygame.sprite.Group()
         self.boundaryHoriz = pygame.sprite.Group()
@@ -287,7 +403,6 @@ class Level_2(Level):
                         # SpawnPoint
                         case 7:
                             pos = (x * 32, y * 32)
-
                             self.spawnPoint.add(Tile(pos=pos, surf=surf))
                         # Where level2 ends
                         case 8:
@@ -335,7 +450,6 @@ class Level_2(Level):
 
     def enemies_collision(self):
         player = self.player.sprite
-
         for enemy in self.enemies.sprites():
             if enemy.rect.colliderect(player.rect) and not player.invincible:
                 player.time = pygame.time.get_ticks()
@@ -348,7 +462,6 @@ class Level_2(Level):
 
 
     # if player collides with the teleport tile, transports player to new location
-    # Returns True if after teleportation, screen needs to be shifted
     def teleport_player(self):
         player = self.player.sprite
         # Not confirmed but seems like Ordered with index 0 being farthest
@@ -362,7 +475,6 @@ class Level_2(Level):
             player.rect.x = new_location[0]
             player.rect.y = new_location[1]
             self.recenter(2000)
-            return True
 
         elif player.rect.colliderect(teleport_locations[2].rect):
             new_location = teleport_locations[1].rect.x, teleport_locations[1].rect.y
@@ -371,9 +483,6 @@ class Level_2(Level):
             player.rect.x = new_location[0]
             player.rect.y = new_location[1]
             self.recenter(500)
-            return True
-        else:
-            return False
 
 
 
