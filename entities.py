@@ -20,7 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.8
         self.health = 5
         self.invincible = False
-        self.can_dash = True
+        self.can_dash = False
         self.time = pygame.time.get_ticks()
 
 
