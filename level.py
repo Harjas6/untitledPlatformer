@@ -291,7 +291,7 @@ class Level_0(Level):
                         # instruction locations
                         case 8:
                             pos = (x * 32, y * 32)
-                            self.tutorial_locations.add(Tile(pos=pos, surf=surf))
+                            self.insert_instructions(pos,surf)
         x = self.spawnPoint.sprite.rect.x
         y = self.spawnPoint.sprite.rect.y
         self.player.add(Player((x, y)))
@@ -322,6 +322,10 @@ class Level_0(Level):
         # Updates both boundary's but keeps it invisible
         self.boundaryHoriz.update(self.world_shift)
         self.boundaryVert.update(self.world_shift)
+
+        # updates and draws instructions
+        self.tutorial_locations.update(self.world_shift)
+        self.tutorial_locations.draw(self.display)
 
 
     def teleport_player(self):
@@ -355,6 +359,22 @@ class Level_0(Level):
             player_dead = player.is_dead()
             if player_dead:
                 self.game_over = True
+
+    def insert_instructions(self,pos,surf):
+        movement = pygame.image.load('images/tutorial/tutorial_movement.png').convert_alpha()
+        portal = pygame.image.load('images/tutorial/tutorial_portal.png').convert_alpha()
+        enemy = pygame.image.load('images/tutorial/tutorial_enemies.png').convert_alpha()
+        star = pygame.image.load('images/tutorial/tutorial_star.png').convert_alpha()
+        # positions found from tmx file when level was designed
+        if pos[0] == 11*32:
+            self.tutorial_locations.add(Tile(pos=pos, surf =movement))
+        elif pos[0] == 35*32:
+            self.tutorial_locations.add(Tile(pos=pos, surf =portal))
+        elif pos[0] == 65*32:
+            self.tutorial_locations.add(Tile(pos=pos, surf =enemy))
+        else:
+            self.tutorial_locations.add(Tile(pos=pos, surf =star))
+
 class Level_2(Level):
 
     # Makes groups
