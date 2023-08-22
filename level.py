@@ -40,7 +40,7 @@ class Level():
             self.display.blit(self.heart, (offset, 10))
             offset += 58
 
-    # Runs the level2
+    # Runs the level
     def run(self):
         self.level_end()
         self.scroll_cam()
@@ -95,7 +95,7 @@ class Level():
     def collisons(self):
         pass
 
-    # Checks if at end of level2
+    # Checks if at end of level
     def level_end(self):
         end_tile = self.endpoint.sprite
         player = self.player.sprite
@@ -133,6 +133,17 @@ class Level():
                     player.direction.y = 0
                     return None
         player.in_air = True
+
+    def enemies_collision(self):
+        player = self.player.sprite
+        for enemy in self.enemies.sprites():
+            if enemy.rect.colliderect(player.rect) and not player.invincible:
+                player.time = pygame.time.get_ticks()
+                player.health -= enemy.dmg
+                player.invincible = True
+            player_dead = player.is_dead()
+            if player_dead:
+                self.game_over = True
 
     # moves camera toward player and turns off player movement for given amount of time(ms)
     # need to be refactored to limit similarities in code!!!
@@ -349,16 +360,6 @@ class Level_0(Level):
         self.enemies_collision()
         self.boundary_collisons()
 
-    def enemies_collision(self):
-        player = self.player.sprite
-        for enemy in self.enemies.sprites():
-            if enemy.rect.colliderect(player.rect) and not player.invincible:
-                player.time = pygame.time.get_ticks()
-                player.health -= enemy.dmg
-                player.invincible = True
-            player_dead = player.is_dead()
-            if player_dead:
-                self.game_over = True
 
     def insert_instructions(self,pos,surf):
         movement = pygame.image.load('images/tutorial/tutorial_movement.png').convert_alpha()
@@ -375,6 +376,101 @@ class Level_0(Level):
         else:
             self.tutorial_locations.add(Tile(pos=pos, surf =star))
 
+class Level_1(Level):
+
+    # Makes groups
+    def make_groups(self):
+        self.tiles = pygame.sprite.Group()
+        self.boundaryHoriz = pygame.sprite.Group()
+        self.boundaryVert = pygame.sprite.Group()
+        self.player = pygame.sprite.GroupSingle()
+        self.spawnPoint = pygame.sprite.GroupSingle()
+        self.enemies = pygame.sprite.Group()
+        self.endpoint = pygame.sprite.GroupSingle()
+        self.instructions = pygame.sprite.GroupSingle()
+
+    # Reads tmx file to create level1
+    def create_level(self):
+        layers = self.tmx_data.visible_layers
+        level = 0
+        for layer in layers:
+            level += 1
+            if hasattr(layer, 'data'):
+                for x, y, surf in layer.tiles():
+                    match level:
+                        case 1:
+                            pos = (x * 32, y * 32)
+                            self.tiles.add(Tile(pos=pos, surf=surf))
+                            # stationary enemies
+                        case 2:
+                            pos = (x * 32, y * 32)
+                            self.enemies.add(Enemy(pos,0, speed=0))
+                            # horizontal enemies
+                        case 3:
+                            pos = (x * 32, y * 32)
+                            self.enemies.add(Enemy(pos, 1500, speed=3))
+                            # boundary tiles
+                        case 4:
+                            pos = (x * 32, y * 32)
+                            self.boundaryHoriz.add(Tile(pos=pos, surf=surf))
+                        case 5:
+                            pos = (x * 32, y * 32)
+                            self.boundaryVert.add(Tile(pos=pos, surf=surf))
+                            # SpawnPoint
+                        case 6:
+                            pos = (x * 32, y * 32)
+                            self.spawnPoint.add(Tile(pos=pos, surf=surf))
+                            # Where level1 ends
+                        case 7:
+                            pos = (x * 32, y * 32)
+                            self.endpoint.add(Tile(pos=pos, surf=surf))
+                        case 8:
+                            pos = (x * 32, y * 32)
+                            # instructions = pygame.image.load('images/tutorial/tutorial_stay_on_screen.png')
+                            self.instructions.add(Tile(pos=pos, surf=surf))
+        x = self.spawnPoint.sprite.rect.x
+        y = self.spawnPoint.sprite.rect.y
+        self.player.add(Player((x, y)))
+
+    def update_screen(self):
+    # updates all neccessary groups
+        # updates world tiles
+        self.tiles.update(self.world_shift)
+        self.tiles.draw(self.display)
+
+        # keeps spawn Point in line wiht the rest of the tiles
+        self.spawnPoint.update(self.world_shift)
+
+        # keeps end Point in line wiht the rest of the tiles
+        self.endpoint.update(self.world_shift)
+        self.endpoint.draw(self.display)
+
+        # update enemies
+        self.enemies.update(self.world_shift)
+        self.enemies.draw(self.display)
+
+        # Updates both boundary's but keeps it invisible
+        self.boundaryHoriz.update(self.world_shift)
+        self.boundaryVert.update(self.world_shift)
+
+    def teleport_player(self):
+        pass
+
+    def scroll_x(self):
+        # self.world_shift.x = -2
+        # self.player.sprite.rect.x += -2
+        pass
+
+     # All collsions
+    def collisons(self):
+        self.horiz_tiles_collide()
+        self.vert_tiles_collide()
+        self.enemies_collision()
+        self.boundary_collisons()
+        self.off_screen()
+
+    def off_screen(self):
+        pass
 class Level_2(Level):
 
     # Makes groups
@@ -468,16 +564,7 @@ class Level_2(Level):
         self.boundary_collisons()
 
 
-    def enemies_collision(self):
-        player = self.player.sprite
-        for enemy in self.enemies.sprites():
-            if enemy.rect.colliderect(player.rect) and not player.invincible:
-                player.time = pygame.time.get_ticks()
-                player.health -= enemy.dmg
-                player.invincible = True
-            player_dead = player.is_dead()
-            if player_dead:
-                self.game_over = True
+
 
 
 

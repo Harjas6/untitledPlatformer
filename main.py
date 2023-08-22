@@ -11,7 +11,7 @@ class Game():
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT),pygame.DOUBLEBUF)
         self.level = Level_0('levels/tutorial/tmx/untitledPlatformerTutorial.tmx', 250)
         self.clock = pygame.time.Clock()
-        self.level_num = 1
+        self.level_num = 0
 
     def run(self):
         while True:
@@ -41,13 +41,14 @@ class Game():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_r]:
             self.level = Level_0('levels/tutorial/tmx/untitledPlatformerTutorial.tmx',250)
-            self.level_num=1
+            self.level_num=0
         elif keys[pygame.K_q]:
             pygame.quit()
             sys.exit()
 
     def choose_level(self):
         match self.level_num:
+            case 1: return Level_1('levels/level1/tmx/untitledPlatformerLevel1.tmx',500)
             case 2: return Level_2('levels/level2/tmx/untitledPlatformerLevel2.tmx',3000)
 
 if __name__ == '__main__':
