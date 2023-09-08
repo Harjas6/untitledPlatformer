@@ -49,6 +49,8 @@ class Game():
             sys.exit()
 
     def choose_level(self,player):
+        player.direction.x = 0
+        player.direction.y = 0
         match self.level_num:
             case 1: return Level_1('levels/level1/tmx/untitledPlatformerLevel1.tmx',500,player)
             case 2: return Level_2('levels/level2/tmx/untitledPlatformerLevel2.tmx',3000,player)

@@ -428,6 +428,7 @@ class Level_1(Level):
                             self.endpoint.add(Tile(pos=pos, surf=surf))
                         case 8:
                             pos = (x * 32, y * 32)
+                            # UNCOMMENT WHEN PICTURE IS ACTUALLY ADDED TO FILES
                             # instructions = pygame.image.load('images/tutorial/tutorial_stay_on_screen.png')
                             self.instructions.add(Tile(pos=pos, surf=surf))
         x = self.spawnPoint.sprite.rect.x
