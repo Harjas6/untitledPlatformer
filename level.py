@@ -6,7 +6,7 @@ from entities import Player, Enemy
 from settings import *
 
 class Level():
-    def __init__(self, level_file,start_delay):
+    def __init__(self, level_file,start_delay,player):
         self.clock = pygame.time.Clock()
         self.display = pygame.display.get_surface()
         self.next_level = False
@@ -23,7 +23,7 @@ class Level():
         self.heart = pygame.transform.scale(self.heart, (48,48))
 
         self.start_time = pygame.time.get_ticks()
-        self.create_level()
+        self.create_level(player)
 
     # Makes groups needed for level2. Will be specific to each level2
     def make_groups(self):
@@ -264,7 +264,7 @@ class Level_0(Level):
         self.tutorial_locations = pygame.sprite.Group()
 
     # Reads tmx file to create level0
-    def create_level(self):
+    def create_level(self,player):
         layers = self.tmx_data.visible_layers
         level = 0
         for layer in layers:
@@ -305,7 +305,9 @@ class Level_0(Level):
                             self.insert_instructions(pos,surf)
         x = self.spawnPoint.sprite.rect.x
         y = self.spawnPoint.sprite.rect.y
-        self.player.add(Player((x, y)))
+        player.rect.x = x
+        player.rect.y= y
+        self.player.add(player)
         self.tiles.draw(self.display)
 
 
@@ -390,7 +392,7 @@ class Level_1(Level):
         self.instructions = pygame.sprite.GroupSingle()
 
     # Reads tmx file to create level1
-    def create_level(self):
+    def create_level(self,player):
         layers = self.tmx_data.visible_layers
         level = 0
         for layer in layers:
@@ -430,7 +432,9 @@ class Level_1(Level):
                             self.instructions.add(Tile(pos=pos, surf=surf))
         x = self.spawnPoint.sprite.rect.x
         y = self.spawnPoint.sprite.rect.y
-        self.player.add(Player((x, y)))
+        player.rect.x = x
+        player.rect.y = y
+        self.player.add(player)
 
     def update_screen(self):
     # updates all neccessary groups
@@ -456,21 +460,13 @@ class Level_1(Level):
     def teleport_player(self):
         pass
 
-    def scroll_x(self):
-        # self.world_shift.x = -2
-        # self.player.sprite.rect.x += -2
-        pass
-
      # All collsions
     def collisons(self):
         self.horiz_tiles_collide()
         self.vert_tiles_collide()
         self.enemies_collision()
         self.boundary_collisons()
-        self.off_screen()
 
-    def off_screen(self):
-        pass
 class Level_2(Level):
 
     # Makes groups
@@ -485,7 +481,7 @@ class Level_2(Level):
         self.endpoint = pygame.sprite.GroupSingle()
 
     # Reads tmx file to create level2
-    def create_level(self):
+    def create_level(self,player):
         layers = self.tmx_data.visible_layers
         level = 0
         for layer in layers:
@@ -527,7 +523,9 @@ class Level_2(Level):
 
         x = self.spawnPoint.sprite.rect.x
         y = self.spawnPoint.sprite.rect.y
-        self.player.add(Player((x,y)))
+        player.rect.x = x
+        player.rect.y = y
+        self.player.add(player)
         self.tiles.draw(self.display)
 
 
@@ -562,10 +560,6 @@ class Level_2(Level):
         self.vert_tiles_collide()
         self.enemies_collision()
         self.boundary_collisons()
-
-
-
-
 
 
     # if player collides with the teleport tile, transports player to new location
