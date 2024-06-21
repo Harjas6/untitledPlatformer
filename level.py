@@ -19,7 +19,7 @@ class Level():
         self.world_shift = pygame.math.Vector2()
         self.shift_amount = 8
 
-        self.heart = pygame.image.load('images/heart.png')
+        self.heart = pygame.image.load('images/entities/heart.png')
         self.heart = pygame.transform.scale(self.heart, (48,48))
 
         self.start_time = pygame.time.get_ticks()
