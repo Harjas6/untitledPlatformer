@@ -19,7 +19,7 @@ class Level():
         self.world_shift = pygame.math.Vector2()
         self.shift_amount = 8
 
-        self.heart = pygame.image.load('images/entities/heart.png')
+        self.heart = pygame.image.load('images/heart.png')
         self.heart = pygame.transform.scale(self.heart, (48,48))
 
         self.start_time = pygame.time.get_ticks()
@@ -586,7 +586,12 @@ class Level_2(Level):
             player.rect.y = new_location[1]
             self.recenter(500)
 
-
+    # Unique level end function so game doesn't crash after last level and displays game over scene
+    def level_end(self):
+        end_tile = self.endpoint.sprite
+        player = self.player.sprite
+        if end_tile.rect.colliderect(player.rect):
+            self.game_over = True
 
 class Tile(pygame.sprite.Sprite):
     # Creates a block with an image specified by name and places it in a group(s)

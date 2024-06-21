@@ -22,6 +22,7 @@ class Game():
                     sys.exit()
             self.screen.fill('blue')
 
+
             if self.level.next_level:
                 self.level_num +=1
                 self.level = self.choose_level(self.player)
@@ -32,7 +33,7 @@ class Game():
                 pygame.display.update()
 
             else:
-                game_over = pygame.image.load('images/entities/game_over.png')
+                game_over = pygame.image.load('images/game_over.png')
                 self.screen.fill('blue')
                 self.screen.blit(game_over, (WIDTH/3, HEIGHT/3))
                 self.handle_keys()
@@ -54,6 +55,8 @@ class Game():
         match self.level_num:
             case 1: return Level_1('levels/level1/tmx/untitledPlatformerLevel1.tmx',500,player)
             case 2: return Level_2('levels/level2/tmx/untitledPlatformerLevel2.tmx',3000,player)
+
+
 
 if __name__ == '__main__':
     game = Game()

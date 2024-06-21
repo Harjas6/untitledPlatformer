@@ -2,7 +2,7 @@
 
 Platformer made to experiment with making a sidescrolling
 game in pyGame. Has hit detection, moving camera, ability to reset game state and multiple lives.
-All of the Sprites were made by myself.
+All of the Sprites were made by myself. Levels were made in Tiled.
 
 ## How to play
 Run the main file.

@@ -129,7 +129,7 @@ class Player(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, patrol_time, speed = 4, horizontal = True, dmg = 1):
         super().__init__()
-        self.image = pygame.image.load('images/entities/groundL_enemy.png').convert_alpha()
+        self.image = pygame.image.load('images/groundL_enemy.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (64, 64))
         self.rect = self.image.get_rect(topleft=pos)
         self.patrol_time = patrol_time
