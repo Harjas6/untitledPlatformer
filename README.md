@@ -10,4 +10,4 @@ Run the main file.
 Use the arrow keys to move and space to jump.
 
 
-![](https://github.com/untitledPlatformer/untitledPlatformerdemo.gif)
+![](https://github.com/Harjas6/untitledPlatformer/blob/master/untitledPlatformerdemo.gif)
